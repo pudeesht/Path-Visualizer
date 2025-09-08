@@ -1,0 +1,12 @@
+.grid {
+  display: grid;
+  /* This will create columns of 25px each, fitting as many as possible */
+  grid-template-columns: repeat(50, 25px); 
+  gap: 0;
+  margin: 20px auto; /* Center the grid */
+}
+
+/* We can remove the inner div for rows if we use grid, but this also works fine */
+.grid-row {
+  display: contents; /* This makes the row div not affect the grid layout */
+}
