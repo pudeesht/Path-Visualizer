@@ -31,6 +31,10 @@ const Grid = () => {
   const [isMousePressed, setIsMousePressed] = useState(false);
   const lastHoveredNodeRef = useRef(null);
 
+  const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
+
+
+
   useEffect(() => {
     setGrid(createInitialGrid());
   }, []);
@@ -48,26 +52,90 @@ const Grid = () => {
 
   const handleMouseDown = (event) => {
     const { row, col } = event.target.dataset;
-    if (row && col) {
-      toggleWall(parseInt(row), parseInt(col));
-      setIsMousePressed(true);
+    if(!row || !col)
+        return ;
+    const node= grid[parseInt(row)][parseInt(col)];
+    if(node.isStart){
+      setnodeBeingDragged("start");
     }
+    if(node.isEnd){
+      setnodeBeingDragged("end");
+    }
+    else {
+      toggleWall(parseInt(row), parseInt(col));
+    }
+    
+    setIsMousePressed(true);
+    
+
   };
 
   const handleMouseMove = (event) => {
-    if (!isMousePressed) return;
     const { row, col } = event.target.dataset;
-    const lastNode = lastHoveredNodeRef.current;
+    if (!isMousePressed || !row || !col) return;
+    
+    const rowNum=parseInt(row);
+    const colNum=parseInt(col);
 
-    if (row && col && (!lastNode || lastNode.row !== row || lastNode.col !== col)) {
-      lastHoveredNodeRef.current = { row, col }; 
-      toggleWall(parseInt(row), parseInt(col));
+
+    if( nodeBeingDragged)
+    {
+
+      let oldStartNode=null;
+      let oldEndNode=null;
+
+
+      for(const gridRow of grid)
+      {
+        for(const node of gridRow)
+        {
+          if(nodeBeingDragged=="start" && node.isStart)
+          {
+            oldStartNode=node;
+            break;
+          }
+          if(nodeBeingDragged=="end" && node.isEnd)
+          {
+
+            oldEndNode=node;
+            break;
+          }
+        }
+        if(oldStartNode||oldEndNode)break;
+      }
+
+      if(nodeBeingDragged==="start")
+      {
+        oldStartNode.isStart=false;
+        grid[rowNum][colNum].isStart=true;
+      }
+      if(nodeBeingDragged==="end")
+      {
+        oldEndNode.isEnd=false;
+        grid[rowNum][colNum].isEnd=true;
+      }
+
+
+
     }
+    
+    
+    else{
+        const lastNode = lastHoveredNodeRef.current;
+    
+        if (!lastNode || lastNode.row !== row || lastNode.col !== col) {
+          lastHoveredNodeRef.current = { row, col }; 
+          toggleWall(rowNum, colNum);
+        }
+
+    }
+    
   };
 
   const handleMouseUp = () => {
     setIsMousePressed(false);
     lastHoveredNodeRef.current = null; 
+    setnodeBeingDragged(null);
   };
 
   return (
