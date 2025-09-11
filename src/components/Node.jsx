@@ -8,15 +8,23 @@ const Node = ({
   isStart,
   isEnd,
   isWall,
+  isVisited,
+  isPath,
 }) => {
-  const extraClassName = isEnd
+   const extraClassName = isEnd
     ? 'node-end'
     : isStart
     ? 'node-start'
+    : isPath 
+    ? 'node-path'
+    : isVisited
+    ? 'node-visited'
     : isWall
     ? 'node-wall'
     : '';
   console.log(`rendered-${row}-${col}`);
+ 
+  
   return (
     <div
       id={`node-${row}-${col}`}
@@ -24,7 +32,9 @@ const Node = ({
 
       data-row={row}
       data-col={col}
-    ></div>
+    >
+            {/* {row},{col} */}
+</div>
   );
 };
 

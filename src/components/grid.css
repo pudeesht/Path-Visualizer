@@ -1,7 +1,7 @@
 .grid {
   display: grid;
   /* This will create columns of 25px each, fitting as many as possible */
-  grid-template-columns: repeat(50, 25px); 
+  grid-template-columns: repeat(30, 25px); 
   gap: 0;
   margin: 20px auto; /* Center the grid */
 }

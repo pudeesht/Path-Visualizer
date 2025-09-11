@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'; 
 import Node from './Node';
 import './Grid.css';
+import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 
-const GRID_ROWS = 20;
-const GRID_COLS = 50;
+
+const GRID_ROWS =20;
+const GRID_COLS = 30;
 
 const createInitialGrid = () => {
   const grid = [];
@@ -13,11 +15,12 @@ const createInitialGrid = () => {
       currentRow.push({
         row,
         col,
-        isStart: row === 10 && col === 5,
-        isEnd: row === 10 && col === 45,
+        isStart: row === 2 && col === 5,
+        isEnd: row === 1 && col === 1,
         isWall: false,
         distance: Infinity,
         isVisited: false,
+        isPath:false,
         previousNode: null,
       });
     }
@@ -33,7 +36,183 @@ const Grid = () => {
 
   const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
 
+  
+const resetGridKeepWalls = () => {
+  setGrid(prevGrid => {
+    const newGrid = prevGrid.map(row => {
+      return row.map(node => {
+        // Create a new node object, preserving walls
+        // but resetting everything else.
+        const newNode = {
+          ...node,
+          isVisited: false,
+          isPath: false,
+          distance: Infinity,
+          previousNode: null,
+        };
+        // Reset the visual state, but don't remove the wall class instantly
+        // This is more about resetting the algorithm properties
+        if (node.isStart) {
+            document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-start';
+        } else if (node.isEnd) {
+            document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-end';
+        } else if (!node.isWall) {
+            document.getElementById(`node-${node.row}-${node.col}`).className = 'node';
+        }
+        return newNode;
+      });
+    });
+    return newGrid;
+  });
+};
+///////////////
 
+
+const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      if (i === visitedNodesInOrder.length) {
+        setTimeout(() => {
+          animateShortestPath(nodesInShortestPathOrder);
+        }, 10 * i);
+        return;
+      }
+      setTimeout(() => {
+        const node = visitedNodesInOrder[i];
+        // Use the functional update form for safety
+        setGrid(prevGrid => {
+          const newGrid = prevGrid.map(row => row.slice());
+          const gridNode = newGrid[node.row][node.col];
+
+          // Make sure not to overwrite start/end node visuals
+          if (!gridNode.isStart && !gridNode.isEnd) {
+             const newGridNode = { ...gridNode, isVisited: true };
+             newGrid[node.row][node.col] = newGridNode;
+          }
+          return newGrid;
+        });
+      }, 10 * i);
+    }
+  };
+
+  const animateShortestPath = (nodesInShortestPathOrder) => {
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      setTimeout(() => {
+        const node = nodesInShortestPathOrder[i];
+        setGrid(prevGrid => {
+          const newGrid = prevGrid.map(row => row.slice());
+          const gridNode = newGrid[node.row][node.col];
+
+          // Make sure not to overwrite start/end node visuals
+          if (!gridNode.isStart && !gridNode.isEnd) {
+            const newGridNode = { ...gridNode, isPath: true };
+            newGrid[node.row][node.col] = newGridNode;
+          }
+          return newGrid;
+        });
+      }, 50 * i);
+    }
+  };
+
+  //  const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
+  //   for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+  //     // When we have animated all the visited nodes, animate the shortest path
+  //     if (i === visitedNodesInOrder.length) {
+  //       setTimeout(() => {
+  //         animateShortestPath(nodesInShortestPathOrder);
+  //       }, 10 * i); // 10ms delay per node
+  //       return;
+  //     }
+      
+  //     // For each visited node, schedule a state update
+  //     setTimeout(() => {
+  //       const node = visitedNodesInOrder[i];
+  //       setGrid(prevGrid => {
+  //         const newGrid = prevGrid.map(row => row.slice());
+  //         const gridNode = newGrid[node.row][node.col];
+  //         const newGridNode = {
+  //           ...gridNode,
+  //           isVisited: true,
+  //         };
+  //         newGrid[node.row][node.col] = newGridNode;
+  //         return newGrid;
+  //       });
+  //     }, 10 * i);
+  //   }
+  // };
+  
+  // const animateShortestPath = (nodesInShortestPathOrder) => {
+  //   for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+  //     setTimeout(() => {
+  //       const node = nodesInShortestPathOrder[i];
+  //       setGrid(prevGrid => {
+  //         const newGrid = prevGrid.map(row => row.slice());
+  //         const gridNode = newGrid[node.row][node.col];
+  //         const newGridNode = {
+  //           ...gridNode,
+  //           isPath: true,
+  //         };
+  //         newGrid[node.row][node.col] = newGridNode;
+  //         return newGrid;
+  //       });
+  //     }, 50 * i); // 50ms delay for a slower, more dramatic path animation
+  //   }
+  // };
+
+
+
+///////////////
+   const visualizeDijkstra = () => {
+    // 1. Reset the board's visual state from any previous run.
+    resetGridKeepWalls();
+
+    // 2. Create a deep copy of the grid to be used by the algorithm.
+    // THIS IS THE CRITICAL FIX. The algorithm will mutate this copy, not the state.
+    const gridCopy = grid.map(row => 
+        row.map(node => ({...node}))
+    );
+
+    // 3. Find the start and end nodes from the copied grid.
+    let startNode = null;
+    let endNode = null;
+    for (const row of gridCopy) {
+      for (const node of row) {
+        if (node.isStart) startNode = node;
+        if (node.isEnd) endNode = node;
+      }
+    }
+
+    if (!startNode || !endNode) return;
+
+    // 4. Run the Dijkstra algorithm on the COPY.
+    const visitedNodesInOrder = dijkstra(gridCopy, startNode, endNode);
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
+
+    // 5. Kick off the animation.
+    animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
+    console.log("Visualize button clicked!");
+  };
+
+
+  // const visualizeDijkstra = () => {
+  //   // 1. Find the start and end nodes from the current grid state.
+  //   let startNode = null;
+  //   let endNode = null;
+  //   for (const row of grid) {
+  //     for (const node of row) {
+  //       if (node.isStart) startNode = node;
+  //       if (node.isEnd) endNode = node;
+  //     }
+  //   }
+
+  //   if (!startNode || !endNode) return;
+
+  //   // 2. Run the Dijkstra algorithm.
+  //   const visitedNodesInOrder = dijkstra(grid, startNode, endNode);
+  //   const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
+
+  //   // 3. Kick off the animation.
+  //   animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
+  // };
 
   useEffect(() => {
     setGrid(createInitialGrid());
@@ -139,29 +318,36 @@ const Grid = () => {
   };
 
   return (
-    <div
-      className="grid"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove} 
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      {grid.map((row, rowIndex) => {
-        return row.map((node, nodeIndex) => {
-          const { row, col, isStart, isEnd, isWall } = node;
-          return (
-            <Node
-              key={`${rowIndex}-${nodeIndex}`}
-              row={row}
-              col={col}
-              isStart={isStart}
-              isEnd={isEnd}
-              isWall={isWall}
-            />
-          );
-        });
-      })}
-    </div>
+    <>
+      <button onClick={visualizeDijkstra}>Visualize</button>
+      <div
+        className="grid"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove} 
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        {grid.map((row, rowIndex) => {
+          return row.map((node, nodeIndex) => {
+            const { row, col, isStart, isEnd, isWall, isPath, isVisited } = node;
+            return (
+              <Node
+                key={`${rowIndex}-${nodeIndex}`}
+                row={row}
+                col={col}
+                isStart={isStart}
+                isEnd={isEnd}
+                isWall={isWall}
+                isPath={isPath}
+                isVisited={isVisited}
+              />
+            );
+          });
+        })}
+      </div>
+    </>
+
+
   );
 };
 
