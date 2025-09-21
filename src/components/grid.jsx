@@ -1,11 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react'; 
+import React, { useState, useEffect, useRef,forwardRef, useImperativeHandle } from 'react'; 
 import Node from './Node';
 import './Grid.css';
 import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 
 
-const GRID_ROWS =30;
-const GRID_COLS = 30;
+// const GRID_ROWS =30;
+// const GRID_COLS = 30;
+
+
+//rows cols app.jsx se use kar
+
+const Grid = forwardRef((props,ref ) => {
+  
+  
+  const [grid, setGrid] = useState([]);
+  const [isMousePressed, setIsMousePressed] = useState(false);
+  const lastHoveredNodeRef = useRef(null);
+  const {rows:GRID_ROWS,cols:GRID_COLS}=props;
+  //this indicates if start or end node is being dragged
+  const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
+
 
 const createInitialGrid = () => {
   const grid = [];
@@ -15,8 +29,8 @@ const createInitialGrid = () => {
       currentRow.push({
         row,
         col,
-        isStart: row === 2 && col === 5,
-        isEnd: row === 1 && col === 1,
+        isStart: row === Math.floor(GRID_ROWS / 2) && col === Math.floor(GRID_COLS / 5),
+        isEnd: row === Math.floor(GRID_ROWS / 2) && col === GRID_COLS - 1 - Math.floor(GRID_COLS / 5),
         isWall: false,
         distance: Infinity,
         isVisited: false,
@@ -29,20 +43,68 @@ const createInitialGrid = () => {
   return grid;
 };
 
-const Grid = () => {
-  const [grid, setGrid] = useState([]);
-  const [isMousePressed, setIsMousePressed] = useState(false);
-  const lastHoveredNodeRef = useRef(null);
 
-  const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
+const clearBoard = () => {
+    // setIsAnimating(false);
+    
+    // Clear any lingering animation classes from the DOM
+    const nodes = document.getElementsByClassName('node');
+    for (const node of nodes) {
+        if (!node.className.includes('node-start') && !node.className.includes('node-end')) {
+            node.className = 'node';
+        }
+    }
 
-  
+    // Generate a brand new grid and set it as the state.
+    const newGrid = createInitialGrid(GRID_ROWS, GRID_COLS);
+    setGrid(newGrid);
+  };
+
+
+const clearPath = () => {
+    // We disable mouse events during animation, so let's reset that state.
+    // We'll add this state in the next big step. For now, it's good practice.
+    // setIsAnimating(false); 
+    
+    setGrid(prevGrid => {
+      const newGrid = prevGrid.map(row => 
+        row.map(node => {
+          // Check if the node is the start or end node to avoid clearing its class
+          // const isSpecialNode = node.isStart || node.isEnd;
+          
+          // Reset the DOM element's class, but preserve walls, start, and end nodes.
+          const nodeElement = document.getElementById(`node-${node.row}-${node.col}`);
+          if (nodeElement) {
+              if (node.isStart) {
+                  nodeElement.className = 'node node-start';
+              } else if (node.isEnd) {
+                  nodeElement.className = 'node node-end';
+              } else if (node.isWall) {
+                  nodeElement.className = 'node node-wall';
+              } else {
+                  nodeElement.className = 'node';
+              }
+          }
+
+          // Return a new node object, keeping wall status, but resetting others.
+          return {
+            ...node,
+            distance: Infinity,
+            isVisited: false,
+            isPath: false,
+            previousNode: null,
+          };
+        })
+      );
+      return newGrid;
+    });
+};
+
+
 const resetGridKeepWalls = () => {
   setGrid(prevGrid => {
     const newGrid = prevGrid.map(row => {
       return row.map(node => {
-        // Create a new node object, preserving walls
-        // but resetting everything else.
         const newNode = {
           ...node,
           isVisited: false,
@@ -50,8 +112,6 @@ const resetGridKeepWalls = () => {
           distance: Infinity,
           previousNode: null,
         };
-        // Reset the visual state, but don't remove the wall class instantly
-        // This is more about resetting the algorithm properties
         if (node.isStart) {
             document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-start';
         } else if (node.isEnd) {
@@ -65,8 +125,19 @@ const resetGridKeepWalls = () => {
     return newGrid;
   });
 };
-///////////////
 
+//thru this hamara jo parent hai (app.jsx) woh uske child(grid.jsx)ke functions ko call kar sakta hai
+useImperativeHandle(ref, () => ({
+    visualize: () => {
+      visualizeDijkstra();
+    },
+    clearBoard: () => {
+      clearBoard();
+    },
+    clearPath: () => {
+      clearPath();
+    },
+  }));
 
 const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
@@ -113,54 +184,6 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
     }
   };
 
-  //  const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
-  //   for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-  //     // When we have animated all the visited nodes, animate the shortest path
-  //     if (i === visitedNodesInOrder.length) {
-  //       setTimeout(() => {
-  //         animateShortestPath(nodesInShortestPathOrder);
-  //       }, 10 * i); // 10ms delay per node
-  //       return;
-  //     }
-      
-  //     // For each visited node, schedule a state update
-  //     setTimeout(() => {
-  //       const node = visitedNodesInOrder[i];
-  //       setGrid(prevGrid => {
-  //         const newGrid = prevGrid.map(row => row.slice());
-  //         const gridNode = newGrid[node.row][node.col];
-  //         const newGridNode = {
-  //           ...gridNode,
-  //           isVisited: true,
-  //         };
-  //         newGrid[node.row][node.col] = newGridNode;
-  //         return newGrid;
-  //       });
-  //     }, 10 * i);
-  //   }
-  // };
-  
-  // const animateShortestPath = (nodesInShortestPathOrder) => {
-  //   for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-  //     setTimeout(() => {
-  //       const node = nodesInShortestPathOrder[i];
-  //       setGrid(prevGrid => {
-  //         const newGrid = prevGrid.map(row => row.slice());
-  //         const gridNode = newGrid[node.row][node.col];
-  //         const newGridNode = {
-  //           ...gridNode,
-  //           isPath: true,
-  //         };
-  //         newGrid[node.row][node.col] = newGridNode;
-  //         return newGrid;
-  //       });
-  //     }, 50 * i); // 50ms delay for a slower, more dramatic path animation
-  //   }
-  // };
-
-
-
-///////////////
    const visualizeDijkstra = () => {
     // 1. Reset the board's visual state from any previous run.
     resetGridKeepWalls();
@@ -192,39 +215,24 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
     console.log("Visualize button clicked!");
   };
 
-
-  // const visualizeDijkstra = () => {
-  //   // 1. Find the start and end nodes from the current grid state.
-  //   let startNode = null;
-  //   let endNode = null;
-  //   for (const row of grid) {
-  //     for (const node of row) {
-  //       if (node.isStart) startNode = node;
-  //       if (node.isEnd) endNode = node;
-  //     }
-  //   }
-
-  //   if (!startNode || !endNode) return;
-
-  //   // 2. Run the Dijkstra algorithm.
-  //   const visitedNodesInOrder = dijkstra(grid, startNode, endNode);
-  //   const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
-
-  //   // 3. Kick off the animation.
-  //   animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
-  // };
-
   useEffect(() => {
     setGrid(createInitialGrid());
   }, []);
 
   const toggleWall = (row, col) => {
     setGrid(prevGrid => {
+
+      //this line makes shallow copy of each row of original grid , AGAR SEEDHA GRID.SLICE KARTE TOH BAHAR KE ARRAY KI SHALLOW COPY BANTI, ANDAR KA CONTENT SAME HOTA TOH ANY CHANGES ON NEW WOULD HAVE CAUSED CHANGES ON OLD ONE TOO
       const newGrid = prevGrid.map(gridRow => gridRow.slice());
       const node = newGrid[row][col];
+
       if (node.isStart || node.isEnd) return prevGrid;
+      
+      //yaha pe i made a change ki a click will make a wall, not toggle the wall status
       // const newNode = { ...node, isWall: !node.isWall };
       const newNode = { ...node, isWall: true };
+      
+      
       newGrid[row][col] = newNode;
       return newGrid;
     });
@@ -320,7 +328,7 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
 
   return (
     <>
-      <button onClick={visualizeDijkstra}>Visualize</button>
+      {/* <button onClick={visualizeDijkstra}>Visualize</button> */}
       <div
         className="grid"
         onMouseDown={handleMouseDown}
@@ -354,6 +362,6 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
 
 
   );
-};
+});
 
 export default Grid;
