@@ -4,7 +4,7 @@ import './Grid.css';
 import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 
 
-const GRID_ROWS =20;
+const GRID_ROWS =30;
 const GRID_COLS = 30;
 
 const createInitialGrid = () => {
@@ -223,7 +223,8 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
       const newGrid = prevGrid.map(gridRow => gridRow.slice());
       const node = newGrid[row][col];
       if (node.isStart || node.isEnd) return prevGrid;
-      const newNode = { ...node, isWall: !node.isWall };
+      // const newNode = { ...node, isWall: !node.isWall };
+      const newNode = { ...node, isWall: true };
       newGrid[row][col] = newNode;
       return newGrid;
     });
@@ -326,6 +327,10 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
         onMouseMove={handleMouseMove} 
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${GRID_COLS}, 25px)`, 
+      }}
       >
         {grid.map((row, rowIndex) => {
           return row.map((node, nodeIndex) => {
