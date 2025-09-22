@@ -4,11 +4,7 @@ import './Grid.css';
 import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 
 
-// const GRID_ROWS =30;
-// const GRID_COLS = 30;
 
-
-//rows cols app.jsx se use kar
 
 const Grid = forwardRef((props,ref ) => {
   
@@ -16,7 +12,7 @@ const Grid = forwardRef((props,ref ) => {
   const [grid, setGrid] = useState([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
   const lastHoveredNodeRef = useRef(null);
-  const {rows:GRID_ROWS,cols:GRID_COLS}=props;
+  const {rows:GRID_ROWS,cols:GRID_COLS,isAnimating}=props;
   //this indicates if start or end node is being dragged
   const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
 
@@ -209,10 +205,19 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
     // 4. Run the Dijkstra algorithm on the COPY.
     const visitedNodesInOrder = dijkstra(gridCopy, startNode, endNode);
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
-
-    // 5. Kick off the animation.
+    
+    
+    const visitedAnimationDuration = visitedNodesInOrder.length * 10; // 10ms per node
+    const pathAnimationDuration = nodesInShortestPathOrder.length * 50; // 50ms per node
+    const totalDuration = visitedAnimationDuration + pathAnimationDuration;
+    
+   
+   
+   // 5. Kick off the animation.
     animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
     console.log("Visualize button clicked!");
+
+    return{totalDuration};
   };
 
   useEffect(() => {
@@ -331,10 +336,10 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
       {/* <button onClick={visualizeDijkstra}>Visualize</button> */}
       <div
         className="grid"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove} 
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseDown={isAnimating?undefined:handleMouseDown}
+        onMouseMove={isAnimating?undefined:handleMouseMove} 
+        onMouseUp={isAnimating?undefined:handleMouseUp}
+        onMouseLeave={isAnimating?undefined:handleMouseUp}
         style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${GRID_COLS}, 25px)`, 

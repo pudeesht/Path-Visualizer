@@ -12,3 +12,9 @@
 .grid-row {
   display: contents; /* This makes the row div not affect the grid layout */
 }
+
+.button:disabled {
+  cursor: not-allowed;
+  background-color: #d3d3d3;
+  color: #888;
+}
