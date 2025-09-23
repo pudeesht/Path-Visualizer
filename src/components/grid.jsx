@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef,forwardRef, useImperativeHandle } from 'react'; 
 import Node from './Node';
 import './Grid.css';
-import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
+// import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
 
 
 
@@ -12,7 +12,7 @@ const Grid = forwardRef((props,ref ) => {
   const [grid, setGrid] = useState([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
   const lastHoveredNodeRef = useRef(null);
-  const {rows:GRID_ROWS,cols:GRID_COLS,isAnimating}=props;
+  const {rows:GRID_ROWS,cols:GRID_COLS,isAnimating,visitedNodes,pathNodes }=props;
   //this indicates if start or end node is being dragged
   const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
 
@@ -97,42 +97,42 @@ const clearPath = () => {
 };
 
 
-const resetGridKeepWalls = () => {
-  setGrid(prevGrid => {
-    const newGrid = prevGrid.map(row => {
-      return row.map(node => {
-        const newNode = {
-          ...node,
-          isVisited: false,
-          isPath: false,
-          distance: Infinity,
-          previousNode: null,
-        };
-        if (node.isStart) {
-            document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-start';
-        } else if (node.isEnd) {
-            document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-end';
-        } else if (!node.isWall) {
-            document.getElementById(`node-${node.row}-${node.col}`).className = 'node';
-        }
-        return newNode;
-      });
-    });
-    return newGrid;
-  });
-};
+// const resetGridKeepWalls = () => {
+//   setGrid(prevGrid => {
+//     const newGrid = prevGrid.map(row => {
+//       return row.map(node => {
+//         const newNode = {
+//           ...node,
+//           isVisited: false,
+//           isPath: false,
+//           distance: Infinity,
+//           previousNode: null,
+//         };
+//         if (node.isStart) {
+//             document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-start';
+//         } else if (node.isEnd) {
+//             document.getElementById(`node-${node.row}-${node.col}`).className = 'node node-end';
+//         } else if (!node.isWall) {
+//             document.getElementById(`node-${node.row}-${node.col}`).className = 'node';
+//         }
+//         return newNode;
+//       });
+//     });
+//     return newGrid;
+//   });
+// };
 
 //thru this hamara jo parent hai (app.jsx) woh uske child(grid.jsx)ke functions ko call kar sakta hai
 useImperativeHandle(ref, () => ({
-    visualize: () => {
-      visualizeDijkstra();
-    },
+    
     clearBoard: () => {
       clearBoard();
     },
     clearPath: () => {
       clearPath();
     },
+    getGrid: () => grid,
+
   }));
 
 const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
@@ -180,49 +180,60 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
     }
   };
 
-   const visualizeDijkstra = () => {
-    // 1. Reset the board's visual state from any previous run.
-    resetGridKeepWalls();
+// const visualizeDijkstra = () => {
 
-    // 2. Create a deep copy of the grid to be used by the algorithm.
-    // THIS IS THE CRITICAL FIX. The algorithm will mutate this copy, not the state.
-    const gridCopy = grid.map(row => 
-        row.map(node => ({...node}))
-    );
+//     console.log("from in button, isanimating is ",isAnimating);
 
-    // 3. Find the start and end nodes from the copied grid.
-    let startNode = null;
-    let endNode = null;
-    for (const row of gridCopy) {
-      for (const node of row) {
-        if (node.isStart) startNode = node;
-        if (node.isEnd) endNode = node;
-      }
-    }
+//     // 1. Reset the board's visual state from any previous run.
+//     resetGridKeepWalls();
 
-    if (!startNode || !endNode) return;
+//     // 2. Create a deep copy of the grid to be used by the algorithm.
+//     // THIS IS THE CRITICAL FIX. The algorithm will mutate this copy, not the state.
+//     const gridCopy = grid.map(row => 
+//         row.map(node => ({...node}))
+//     );
 
-    // 4. Run the Dijkstra algorithm on the COPY.
-    const visitedNodesInOrder = dijkstra(gridCopy, startNode, endNode);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
+//     // 3. Find the start and end nodes from the copied grid.
+//     let startNode = null;
+//     let endNode = null;
+//     for (const row of gridCopy) {
+//       for (const node of row) {
+//         if (node.isStart) startNode = node;
+//         if (node.isEnd) endNode = node;
+//       }
+//     }
+
+//     if (!startNode || !endNode) return;
+
+//     // 4. Run the Dijkstra algorithm on the COPY.
+//     const visitedNodesInOrder = dijkstra(gridCopy, startNode, endNode);
+//     const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
     
     
-    const visitedAnimationDuration = visitedNodesInOrder.length * 10; // 10ms per node
-    const pathAnimationDuration = nodesInShortestPathOrder.length * 50; // 50ms per node
-    const totalDuration = visitedAnimationDuration + pathAnimationDuration;
+//     const visitedAnimationDuration = visitedNodesInOrder.length * 10; // 10ms per node
+//     const pathAnimationDuration = nodesInShortestPathOrder.length * 50; // 50ms per node
+//     const totalDuration = visitedAnimationDuration + pathAnimationDuration;
     
    
    
-   // 5. Kick off the animation.
-    animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
-    console.log("Visualize button clicked!");
+//    // 5. Kick off the animation.
+//     animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
+//     console.log("Visualize button clicked!");
 
-    return{totalDuration};
-  };
+//     return totalDuration ;
+// };
 
   useEffect(() => {
     setGrid(createInitialGrid());
   }, []);
+
+   useEffect(() => {
+    // Only animate if we have received valid data
+    if (visitedNodes.length > 0 && pathNodes.length > 0) {
+      animateDijkstra(visitedNodes, pathNodes);
+    }
+  }, [visitedNodes, pathNodes]);
+
 
   const toggleWall = (row, col) => {
     setGrid(prevGrid => {
@@ -336,10 +347,10 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
       {/* <button onClick={visualizeDijkstra}>Visualize</button> */}
       <div
         className="grid"
-        onMouseDown={isAnimating?undefined:handleMouseDown}
-        onMouseMove={isAnimating?undefined:handleMouseMove} 
-        onMouseUp={isAnimating?undefined:handleMouseUp}
-        onMouseLeave={isAnimating?undefined:handleMouseUp}
+        onMouseDown={!isAnimating ? handleMouseDown : undefined}
+        onMouseMove={!isAnimating ? handleMouseMove : undefined}
+        onMouseUp={!isAnimating ? handleMouseUp : undefined}
+        onMouseLeave={!isAnimating ? handleMouseUp : undefined}
         style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${GRID_COLS}, 25px)`, 

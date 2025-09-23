@@ -2,6 +2,8 @@ import React,{useState,useRef} from 'react';
 import Grid from './components/grid';
 import './App.css';
 import ControlPanel from './components/controlPanel';
+import { dijkstra, getNodesInShortestPathOrder } from './algorithms/dijkstra';
+
 
 
 const GRID_ROWS =10;
@@ -12,41 +14,62 @@ function App() {
 
   const gridRef=useRef();
   const [isAnimating, setisAnimating] = useState(false);
+  const [visitedNodes, setVisitedNodes] = useState([]);
+  const [pathNodes, setPathNodes] = useState([]);
 
-
-  const handleVisualize = () => {
-    // 1. Prevent multiple clicks while an animation is in progress.
+   const handleVisualize = () => {
     if (isAnimating) return;
+    
+    // 3. Clear any previous path visuals before starting a new one.
+    handleClearPath();
+    
+    // 4. Get the current grid data from the Grid component
+    const currentGrid = gridRef.current.getGrid();
+    
+    // Create a clean copy for the algorithm to mutate
+    const gridCopy = currentGrid.map(row => row.map(node => ({...node})));
 
-    // 2. First, get the information we need from the child component.
-    if (gridRef.current) {
-      // This call will kick off the animation inside the Grid.
-      const  totalDuration  = gridRef.current.visualize();
-      
-      // 3. NOW, we tell React to update the state and schedule the reversal.
-      setisAnimating(true);
-      
-      setTimeout(() => {
-        setisAnimating(false);
-      }, totalDuration);
+    // Find start and end nodes from the copy
+    let startNode = null;
+    let endNode = null;
+    for (const row of gridCopy) {
+      for (const node of row) {
+        if (node.isStart) startNode = node;
+        if (node.isEnd) endNode = node;
+      }
     }
-  };
 
+    // 5. Run the algorithm here, in the parent.
+    const visitedNodesInOrder = dijkstra(gridCopy, startNode, endNode);
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
+
+    // 6. Start the process
+    setisAnimating(true);
+    // Set the data that will be passed as props, triggering the animation `useEffect` in Grid
+    setVisitedNodes(visitedNodesInOrder);
+    setPathNodes(nodesInShortestPathOrder);
+
+    // 7. Schedule the end of the animation
+    const totalDuration = (visitedNodesInOrder.length * 10) + (nodesInShortestPathOrder.length * 50);
+    setTimeout(() => {
+      setisAnimating(false);
+    }, totalDuration);
+  };
   
   const handleClearBoard=()=>{
     if(isAnimating)return;
-    if(gridRef.current)
-    {
-      gridRef.current.clearBoard();
-    }
+    setVisitedNodes([]); // Clear animation data
+    setPathNodes([]);  
+    gridRef.current.clearBoard();
+  
   }
 
   const handleClearPath=()=>{
     if(isAnimating)return;
-    if(gridRef.current)
-    {
-      gridRef.current.clearPath();
-    }
+    setVisitedNodes([]); // Clear animation data
+    setPathNodes([]);  
+    gridRef.current.clearPath();
+    
   }
     
   return (
@@ -71,6 +94,8 @@ function App() {
       ref={gridRef}
       rows={GRID_ROWS}
       cols={GRID_COLS}
+      visitedNodes={visitedNodes}
+      pathNodes={pathNodes}
       />
     
     
