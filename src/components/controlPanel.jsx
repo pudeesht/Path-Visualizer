@@ -14,6 +14,9 @@ const ControlPanel = ({isAnimating, onVisualize, onClearBoard, onClearPath }) =>
       <button onClick={onClearBoard} disabled={isAnimating} className="button">
         Clear Board
       </button>
+      {/* <button onClick={()=>{console.log("hello")}} disabled={isAnimating} className="button">
+        Change CSS
+      </button> */}
     </div>
   );
 };
