@@ -10,15 +10,16 @@ const Node = ({
   isWall,
   isVisited,
   isPath,
+  styleNumber, 
 }) => {
    const extraClassName = isEnd
     ? 'node-end'
     : isStart
     ? 'node-start'
-    : isPath 
-    ? 'node-path'
-    : isVisited
-    ? 'node-visited'
+    : isPath
+    ? `node-path-${styleNumber}`
+    : isVisited 
+    ? `node-visited-${styleNumber}`
     : isWall
     ? 'node-wall'
     : '';

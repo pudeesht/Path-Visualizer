@@ -16,8 +16,10 @@ function App() {
   const [isAnimating, setisAnimating] = useState(false);
   const [visitedNodes, setVisitedNodes] = useState([]);
   const [pathNodes, setPathNodes] = useState([]);
+  // const [changeStyle, setchangeStyle] = useState(false)
+  const [styleNumber, setstyleNumber] = useState(0);
 
-   const handleVisualize = () => {
+  const handleVisualize = () => {
     if (isAnimating) return;
     
     // 3. Clear any previous path visuals before starting a new one.
@@ -71,7 +73,18 @@ function App() {
     gridRef.current.clearPath();
     
   }
-    
+  
+  const handleStyleChange=()=>{
+    if(styleNumber==3)
+    {
+      setstyleNumber(1);
+    }
+    else{
+      setstyleNumber(styleNumber+1);
+    }
+  }
+
+
   return (
     <div className="App">
       
@@ -87,6 +100,7 @@ function App() {
        onClearBoard={handleClearBoard}
        onVisualize={handleVisualize}
        onClearPath={handleClearPath}
+       onCssChange={handleStyleChange}
        />   
       
       <Grid
@@ -96,6 +110,7 @@ function App() {
       cols={GRID_COLS}
       visitedNodes={visitedNodes}
       pathNodes={pathNodes}
+      styleNumber={styleNumber}
       />
     
     

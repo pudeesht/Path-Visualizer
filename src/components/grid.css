@@ -6,6 +6,9 @@
   /* grid-template-columns: repeat(50, 25px);  */
   gap: 0;
   margin: 20px auto; /* Center the grid */
+  /* perspective: 1000px; */
+  padding-left: 20px;
+
 }
 
 /* We can remove the inner div for rows if we use grid, but this also works fine */

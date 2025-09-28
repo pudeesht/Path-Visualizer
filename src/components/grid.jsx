@@ -12,7 +12,7 @@ const Grid = forwardRef((props,ref ) => {
   const [grid, setGrid] = useState([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
   const lastHoveredNodeRef = useRef(null);
-  const {rows:GRID_ROWS,cols:GRID_COLS,isAnimating,visitedNodes,pathNodes }=props;
+  const {rows:GRID_ROWS,cols:GRID_COLS,isAnimating,visitedNodes,pathNodes ,styleNumber}=props;
   //this indicates if start or end node is being dragged
   const [nodeBeingDragged, setnodeBeingDragged] = useState(null);
 
@@ -61,7 +61,6 @@ const clearPath = () => {
     // We disable mouse events during animation, so let's reset that state.
     // We'll add this state in the next big step. For now, it's good practice.
     // setIsAnimating(false); 
-    
     setGrid(prevGrid => {
       const newGrid = prevGrid.map(row => 
         row.map(node => {
@@ -369,6 +368,7 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
                 isWall={isWall}
                 isPath={isPath}
                 isVisited={isVisited}
+                styleNumber={styleNumber}
               />
             );
           });
@@ -381,3 +381,9 @@ const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
 });
 
 export default Grid;
+
+
+
+
+
+ 

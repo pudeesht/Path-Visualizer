@@ -19,8 +19,9 @@
 
 
 
+ 
 
-.node-visited-1 {
+.node-visited-0 {
   animation-name: visitedAnimation;
   animation-duration: 1.5s;
   animation-timing-function: ease-out;
@@ -53,7 +54,7 @@
   }
 }
 
-.node-path-1 {
+.node-path-0 {
   animation-name: pathAnimation;
   animation-duration: 0.5s;
   animation-timing-function: ease-in-out;
@@ -78,14 +79,12 @@
         background-color: rgb(255, 254, 106);
     }
 } 
+  
 
 
 
 
-
-
-
-.node-visited {
+.node-visited-1 {
   animation-name: insetBorderAnimation;
   animation-duration: 0.6s;
   animation-timing-function: ease-in-out;
@@ -110,7 +109,7 @@
   }
 }
 
-.node-path {
+.node-path-1 {
   animation-name: pathFlashAnimation;
   animation-duration: 0.8s;
   animation-fill-mode: forwards;
@@ -129,5 +128,38 @@
     /* Settle on a slightly darker, solid cyan */
     background-color: #00bcd4;
     transform: scale(1);
+  }
+} 
+
+
+
+
+.node-visited-2 {
+  animation: flipYAnimation 0.5s ease-in-out forwards;
+}
+
+@keyframes flipYAnimation {
+  from {
+    /* Start by flipping away from the viewer */
+    transform: rotateY(90deg);
+  }
+  to {
+    /* End by facing the viewer, with the new color */
+    transform: rotateY(0deg);
+    background-color: #1e88e5; /* A nice, solid blue */
+  }
+}
+
+.node-path-2 {
+  animation: flipXAnimation 0.5s ease-in-out forwards;
+}
+
+@keyframes flipXAnimation {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+    background-color: #ffc107; /* A classic amber/yellow */
   }
 }
