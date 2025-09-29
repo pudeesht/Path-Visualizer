@@ -132,6 +132,10 @@ useImperativeHandle(ref, () => ({
     },
     getGrid: () => grid,
 
+    setGrid: (newgrid)=>{
+        setGrid(newgrid);
+    }
+
   }));
 
 const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {

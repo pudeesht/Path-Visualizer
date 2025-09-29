@@ -7,7 +7,9 @@
   gap: 0;
   margin: 20px auto; /* Center the grid */
   /* perspective: 1000px; */
+  
   padding-left: 20px;
+  transform-style: preserve-3d; 
 
 }
 

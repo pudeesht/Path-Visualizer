@@ -3,11 +3,11 @@ import Grid from './components/grid';
 import './App.css';
 import ControlPanel from './components/controlPanel';
 import { dijkstra, getNodesInShortestPathOrder } from './algorithms/dijkstra';
+import { recursiveDivisionMaze } from './algorithms/mazeAlgorithms';
 
 
-
-const GRID_ROWS =10;
-const GRID_COLS = 30;
+const GRID_ROWS =35;
+const GRID_COLS = 35;
 
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
   const [visitedNodes, setVisitedNodes] = useState([]);
   const [pathNodes, setPathNodes] = useState([]);
   // const [changeStyle, setchangeStyle] = useState(false)
-  const [styleNumber, setstyleNumber] = useState(0);
+  const [styleNumber, setstyleNumber] = useState(2);
 
   const handleVisualize = () => {
     if (isAnimating) return;
@@ -75,15 +75,28 @@ function App() {
   }
   
   const handleStyleChange=()=>{
-    if(styleNumber==3)
+    if(styleNumber==2)
     {
-      setstyleNumber(1);
+      setstyleNumber(0);
     }
     else{
       setstyleNumber(styleNumber+1);
     }
   }
 
+  const handleGenerateMaze = () => {
+    if (isAnimating) return;
+    
+    // First, clear any existing path/visited nodes
+    handleClearPath();
+    
+    const currentGrid = gridRef.current.getGrid();
+    const newGridWithMaze = recursiveDivisionMaze(currentGrid);
+    
+    // We need a way to set this new grid in the Grid component's state.
+    // We'll add a 'setGrid' function to its imperative handle.
+    gridRef.current.setGrid(newGridWithMaze);
+  };
 
   return (
     <div className="App">
@@ -101,6 +114,7 @@ function App() {
        onVisualize={handleVisualize}
        onClearPath={handleClearPath}
        onCssChange={handleStyleChange}
+       onGenerateMaze={handleGenerateMaze}
        />   
       
       <Grid
