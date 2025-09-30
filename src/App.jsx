@@ -6,8 +6,8 @@ import { dijkstra, getNodesInShortestPathOrder } from './algorithms/dijkstra';
 import { recursiveDivisionMaze } from './algorithms/mazeAlgorithms';
 
 
-const GRID_ROWS =35;
-const GRID_COLS = 35;
+const GRID_ROWS =40;
+const GRID_COLS = 40;
 
 
 function App() {
@@ -89,7 +89,7 @@ function App() {
     
     // First, clear any existing path/visited nodes
     handleClearPath();
-    
+    // handleClearBoard();
     const currentGrid = gridRef.current.getGrid();
     const newGridWithMaze = recursiveDivisionMaze(currentGrid);
     

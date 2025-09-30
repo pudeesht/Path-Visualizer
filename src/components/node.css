@@ -15,8 +15,8 @@
 
 .node-wall {
   /* background-color: rgb(12, 53, 71); */
-    background-color: rgb(0, 0, 0);
-    outline: 1px solid rgb(225, 255, 91);
+    background-color: rgb(0, 11, 56);
+    outline: 1px solid rgb(64, 78, 0);
 
 
 }
@@ -109,7 +109,7 @@
   100% {
     /* The background instantly fills, and the shadow is gone */
     box-shadow: none;
-    background-color: rgba(26, 35, 126, 0.9); /* A very dark indigo */
+    background-color: rgba(42, 54, 193, 0.9); /* A very dark indigo */
     outline: 1px solid rgb(26, 35, 126);
 
   }
