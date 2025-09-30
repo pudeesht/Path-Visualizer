@@ -18,3 +18,20 @@
 .button:hover {
   background-color: #e0e0e0;
 }
+
+/* ... (existing styles) ... */
+
+.select {
+  padding: 9px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+  background-color: #d3d3d3;
+  color: #888;
+}
