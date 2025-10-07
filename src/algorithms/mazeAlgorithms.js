@@ -329,8 +329,16 @@ function addWalls(grid, rowStart, rowEnd, colStart, colEnd, startNode, endNode) 
   const isHorizontal = height > width;
 
   if (isHorizontal) {
-    const wallRow = rowStart + 1 + Math.floor(Math.random() * (height / 2 - 1)) * 2;
-    const passageCol = colStart + Math.floor(Math.random() * (width / 2)) * 2 + 1;
+    let wallRow = rowStart + 1 + Math.floor(Math.random() * (height / 2 - 1)) * 2;
+    let passageCol = colStart + Math.floor(Math.random() * (width / 2)) * 2 + 1;
+    
+    // while (wallRow==lastgap)
+    // {
+    //   wallRow = rowStart + 1 + Math.floor(Math.random() * (height / 2 - 1)) * 2;
+    // }
+
+
+    // if(passageCol==colStart-1)
 
     for (let col = colStart; col <= colEnd; col++) {
       // 4. THE CRITICAL FIX: Do not draw a wall if it's the start/end node OR the passage.

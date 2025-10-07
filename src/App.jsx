@@ -6,8 +6,8 @@ import { dijkstra, getNodesInShortestPathOrder } from './algorithms/dijkstra';
 import { recursiveDivisionMaze } from './algorithms/mazeAlgorithms';
 import { astar } from './algorithms/astar';
 
-const GRID_ROWS =40;
-const GRID_COLS = 40;
+const GRID_ROWS =25;
+const GRID_COLS = 80;
 
 
 function App() {
